@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap"
+      rel="stylesheet"
+    />
+    <title>CRUD</title>
+  </head>
+  <body>
+    <div class="row">
+      <div class="col-2"></div>
+      <div class="col-10"><h1>CRUD</h1></div>
+    </div>
+    <div class="row">
+      <div class="col-1">
+        <div class="col"></div>
+      </div>
+      <div class="col-8">
+        <div class="col">
+          <form method="post">
+            {% csrf_token %} {{ form.as_p }} 
+            {% if action == "create" %}
+            <button type="submit">Crear</button>
+            {% elif action == "update" %}
+            <button type="submit">Actualizar</button>
+            {% endif %}
+          </form>
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo de documento</th>
+                <th>Número de documento</th>
+                <th>Primer Nombre</th>
+                <th>Segundo Nombre</th>
+                <th>Apellidos</th>
+                <th>Fecha de nacimiento</th>
+                <th>Genero</th>
+                <th>Correo Electrónico</th>
+                <th>Celular</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for person in persons %}
+              <tr>
+                <td>{{ person.document_type }}</td>
+                <td>{{ person.document_id }}</td>
+                <td>{{ person.first_name }}</td>
+                <td>{{ person.second_name }}</td>
+                <td>{{ person.lasts_names }}</td>
+                <td>{{ person.birth_date }}</td>
+                <td>{{ person.gender }}</td>
+                <td>{{ person.email }}</td>
+                <td>{{ person.phone }}</td>
+                <td>
+                  <a href="{% url 'update' person.id %}">Editar</a>
+                  <a href="{% url 'delete' person.id %}">Eliminar</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <h2>Logs de Acciones</h2>
+        <button id="toggle-logs">Mostrar/Ocultar Logs</button>
+        <div id="logs" style="display: block">
+          <ul>
+            {% for log in logs %}
+            <li>{{ log.timestamp }} - {{ log.action }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="col-2 card">
+        <div class="col">
+            <h2>Toponomia</h2>
+            <div>
+                <p>
+                    {% if toponimia %}
+                        {{ toponimia }}
+                    {% else %}
+                        <em>No hay información disponible sobre la toponimia.</em>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.getElementById("toggle-logs").onclick = function () {
+        var logsDiv = document.getElementById("logs");
+        if (logsDiv.style.display === "none") {
+          logsDiv.style.display = "block";
+        } else {
+          logsDiv.style.display = "none";
+        }
+      };
+    </script>
+  </body>
+</html>

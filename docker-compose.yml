@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456          # Cambia la contraseña root
+      MYSQL_DATABASE: personalData         # Nombre de la base de datos inicial
+      MYSQL_USER: lfaria                     # Nombre de usuario adicional
+      MYSQL_PASSWORD: 123456               # Contraseña del usuario
+    ports:
+      - "3306:3306"                        # Exponer puerto para acceso externo
+    volumes:
+      - mysql_data:/var/lib/mysql          # Persistencia de datos
+    healthcheck:
+      test: ["CMD", "mysql", "-h", "localhost", "-u", "root", "-p123456", "-e", "SELECT 1"]
+      timeout: 20s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
+  django:
+    build:
+      context: ./CRUDToponimia
+      dockerfile: Dockerfile
+    container_name: django_app
+    env_file:
+      - .env
+    environment:
+      - DEBUG=1
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DB_NAME=personalData
+      - DB_USER=lfaria
+      - DB_PASSWORD=123456
+      - DB_HOST=mysql
+      - DB_PORT=3306
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app
+    links:
+      - mysql
+    command: >
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  mysql_data:
